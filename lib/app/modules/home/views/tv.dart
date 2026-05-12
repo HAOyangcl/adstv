@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
@@ -11,7 +10,6 @@ import 'package:catmovie/app/modules/home/controllers/home_controller.dart';
 import 'package:catmovie/app/widget/k_body.dart';
 import 'package:catmovie/app/widget/window_appbar.dart';
 import 'package:catmovie/app/widget/zoom.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -133,8 +131,59 @@ enum LiveSourceType {
 typedef LiveSourceLinkType
     = Tuple4<String, String, LiveSourceType, Map<String, String>>;
 
-// 已移除内置直播源，用户需要自行导入
-final List<LiveSourceLinkType> kLiveSources = [];
+// TODO(d1y): support dynamic use live sources
+final List<LiveSourceLinkType> kLiveSources = [
+  // https://github.com/vbskycn/iptv
+  Tuple4(
+    "vbskycn/iptv",
+    "tv/iptv4.m3u",
+    LiveSourceType.github,
+    {"branch": "master"},
+  ),
+  // https://github.com/kimwang1978/collect-tv-txt
+  // 这个直播源好像不错🤔?
+  Tuple4(
+    "kimwang1978/collect-tv-txt",
+    "bbxx_lite.m3u",
+    LiveSourceType.github,
+    {"branch": "main"},
+  ),
+  // https://github.com/Guovin/iptv-api
+  Tuple4(
+    "Guovin/iptv-api",
+    "output/ipv4/result.m3u",
+    LiveSourceType.github,
+    {"branch": "gd"},
+  ),
+  // https://github.com/hujingguang/ChinaIPTV
+  // TODO(d1y): 支持解析 m3u8
+  // Tuple4(
+  //   "hujingguang/ChinaIPTV",
+  //   "cnTV_AutoUpdate.m3u8",
+  //   LiveSourceType.github,
+  //   {"branch": "main"},
+  // ),
+  // https://github.com/TianmuTNT/iptv
+  Tuple4(
+    "TianmuTNT/iptv",
+    "iptv.m3u",
+    LiveSourceType.github,
+    {"branch": "main"},
+  ),
+  // https://github.com/mytv-android/China-TV-Live-M3U8
+  Tuple4(
+    "mytv-android/China-TV-Live-M3U8",
+    "iptv.m3u",
+    LiveSourceType.github,
+    {"branch": "main"},
+  ),
+  // https://tv.iill.top
+  // Tuple4("大葱直播(电视)", "https://tv.iill.top/m3u/Gather", LiveSourceType.full, {}),
+  // Tuple4("大葱直播(网络)", "https://tv.iill.top/m3u/Live", LiveSourceType.full, {}),
+  // https://iptv.hacks.tools
+  // https://github.com/xfcjp/xfcjp.github.io
+  // ↑↑↑↑↑↑ 这些怎么样?
+];
 
 var kVideoFits = LinkedHashMap<BoxFit, String>.from({
   BoxFit.contain: "适应",
@@ -400,6 +449,8 @@ class TVUIState extends State<TVUI>
 
   bool showVideoControls = false;
 
+  bool isMobileFullscreen = false;
+
   bool showPlayPauseIcon = false;
   Timer? _playPauseIconTimer;
 
@@ -426,46 +477,10 @@ class TVUIState extends State<TVUI>
   }
 
   void playURL(String url, {isCloseDrawer = true, isWait = true}) async {
-    if (url.isEmpty) {
-      debugPrint("[TV] Error: Attempted to play empty URL");
-      EasyLoading.showError("播放地址为空");
-      return;
-    }
-    debugPrint("[TV] ====== 开始播放 ======");
-    debugPrint("[TV] URL: $url");
-    debugPrint("[TV] Player state before open: ${player.state}");
-    
+    if (url.isEmpty) return;
     realURL = url;
     setState(() {});
-    
-    try {
-      // 先停止当前播放
-      if (player.state.playing) {
-        await player.stop();
-        debugPrint("[TV] Stopped previous playback");
-      }
-      
-      // 打开新媒体
-      await player.open(Media(url));
-      debugPrint("[TV] Media opened, state: ${player.state}");
-      
-      // 等待一小段时间确保加载
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      // 确保播放
-      if (!player.state.playing) {
-        await player.play();
-        debugPrint("[TV] Started playback");
-      }
-      
-      debugPrint("[TV] ====== 播放完成 ======");
-      debugPrint("[TV] Final player state: ${player.state}");
-    } catch (e, stackTrace) {
-      debugPrint("[TV] Error opening player: $e");
-      debugPrint("[TV] Stack trace: $stackTrace");
-      EasyLoading.showError("播放器错误: $e");
-    }
-    
+    player.open(Media(url));
     if (isCloseDrawer) {
       if (isWait) await Future.delayed(const Duration(milliseconds: 420));
       scaffoldKey.currentState?.closeDrawer();
@@ -495,33 +510,6 @@ class TVUIState extends State<TVUI>
     if (GetPlatform.isDesktop) {
       windowManager.addListener(this);
     }
-    
-    // 详细监听播放器状态
-    player.stream.playing.listen((playing) {
-      debugPrint("[TV] Player playing state: $playing");
-    });
-    player.stream.buffering.listen((buffering) {
-      debugPrint("[TV] Player buffering state: $buffering");
-    });
-    player.stream.error.listen((error) {
-      debugPrint("[TV] Player error: $error");
-      if (mounted) {
-        EasyLoading.showError("播放错误: $error");
-      }
-    });
-    
-    // 监听视频尺寸变化
-    player.stream.width.listen((width) {
-      debugPrint("[TV] Video width changed: $width");
-    });
-    player.stream.height.listen((height) {
-      debugPrint("[TV] Video height changed: $height");
-    });
-    player.stream.completed.listen((completed) {
-      debugPrint("[TV] Video completed: $completed");
-    });
-    
-    debugPrint("[TV] Player initialized, isDesktop: ${GetPlatform.isDesktop}");
     super.initState();
   }
 
@@ -558,75 +546,6 @@ class TVUIState extends State<TVUI>
     setState(() {});
   }
 
-  Future<void> importLiveSource() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['m3u', 'txt'],
-        allowMultiple: false,
-      );
-
-      if (result == null) {
-        return;
-      }
-
-      String? filePath = result.files.single.path;
-      if (filePath == null) {
-        EasyLoading.showError("无法获取文件路径");
-        return;
-      }
-
-      File file = File(filePath);
-      if (!await file.exists()) {
-        EasyLoading.showError("文件不存在");
-        return;
-      }
-
-      String content = await file.readAsString();
-      if (content.isEmpty) {
-        EasyLoading.showError("文件内容为空");
-        return;
-      }
-
-      // 解析直播源
-      Groups parsedGroups;
-      String fileName = result.files.single.name;
-      
-      if (fileName.endsWith('.m3u')) {
-        parsedGroups = Loader.parseM3u(content);
-      } else if (fileName.endsWith('.txt')) {
-        parsedGroups = Loader.parseTxt(content);
-      } else {
-        EasyLoading.showError("不支持的文件格式");
-        return;
-      }
-
-      if (parsedGroups.names.isEmpty) {
-        EasyLoading.showError("未找到有效的直播频道");
-        return;
-      }
-
-      // 创建新的直播源
-      String sourceName = fileName.replaceAll(RegExp(r'\.(m3u|txt)$'), '');
-      liveSourceGroups.add(sourceName, 'file://$filePath');
-      
-      // 保存解析结果
-      LiveSource newSource = liveSourceGroups.sources.last;
-      liveSourceGroups.map[newSource] = parsedGroups;
-      
-      // 自动选择新导入的源
-      selectLiveSourceGroup(newSource);
-      
-      int totalChannels = parsedGroups.tvs.values.fold(0, (sum, list) => sum + list.length);
-      EasyLoading.showSuccess("成功导入 ${parsedGroups.names.length} 个分类，共 $totalChannels 个频道");
-      
-      setState(() {});
-    } catch (e) {
-      debugPrint("[TV] Import error: $e");
-      EasyLoading.showError("导入失败: $e");
-    }
-  }
-
   void selectLiveSourceGroup(LiveSource liveSource) async {
     resetCurrGroupState();
     currLiveSource = liveSource;
@@ -635,29 +554,13 @@ class TVUIState extends State<TVUI>
     var _groups = liveSourceGroups.getGroups(liveSource);
     if (_groups == null) {
       var isSuccess = await liveSourceGroups.refreshSource(liveSource);
-      if (!isSuccess) {
-        debugPrint("[TV] Failed to refresh source");
-        return;
-      }
+      if (!isSuccess) return;
       realGroups = liveSourceGroups.getGroups(liveSource)!;
     } else {
       realGroups = _groups;
     }
     groups = realGroups;
-    
-    // 自动播放第一个频道的第一个电视台
-    if (groups.names.isNotEmpty) {
-      currGroupName = groups.names.first;
-      currTVIdx = 0;
-      setState(() {});
-      
-      var firstTVs = groups.tvs[currGroupName];
-      if (firstTVs != null && firstTVs.isNotEmpty) {
-        debugPrint("[TV] Auto-playing first channel: ${firstTVs[0].name}");
-        debugPrint("[TV] URL: ${firstTVs[0].url}");
-        playURL(firstTVs[0].url, isCloseDrawer: false, isWait: false);
-      }
-    }
+    setState(() {});
   }
 
   void toggleDrawer() {
@@ -666,6 +569,27 @@ class TVUIState extends State<TVUI>
     } else {
       scaffoldKey.currentState?.closeDrawer();
     }
+  }
+
+  void _toggleMobileFullscreen() async {
+    var orientation = MediaQuery.of(context).orientation;
+    if (orientation == Orientation.portrait) {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+      homeController.setBottomNavigationBar(false);
+      isMobileFullscreen = true;
+    } else {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+      homeController.setBottomNavigationBar(true);
+      isMobileFullscreen = false;
+    }
+    showVideoControls = false;
+    setState(() {});
   }
 
   // NOTE(d1y): 在桌面端需要能够拖动窗口
@@ -701,34 +625,17 @@ class TVUIState extends State<TVUI>
           children: [
             Positioned.fill(
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: Theme.of(context).brightness == Brightness.dark
-                          ? [
-                              Colors.black.withValues(alpha: 0.45),
-                              Colors.black.withValues(alpha: 0.35),
-                            ]
-                          : [
-                              Colors.white.withValues(alpha: 0.30),
-                              Colors.white.withValues(alpha: 0.20),
-                            ],
-                    ),
-                    borderRadius: BorderRadius.circular(isDesktop ? 16 : 0),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.black.withValues(alpha: 0.38)
+                        : Colors.white.withValues(alpha: 0.24),
+                    borderRadius: BorderRadius.circular(isDesktop ? 12 : 0),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      width: 1.5,
+                      color: Colors.white.withValues(alpha: 0.21),
+                      width: 1,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 20,
-                        spreadRadius: 5,
-                      ),
-                    ],
                   ),
                 ),
               ),
@@ -744,96 +651,7 @@ class TVUIState extends State<TVUI>
                       child: Row(children: [
                         Expanded(
                           flex: isDesktop ? 6 : 4,
-                          child: groups.names.isEmpty
-                              ? Center(
-                                  child: Container(
-                                    padding: EdgeInsets.all(32),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.05),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: Colors.white.withValues(alpha: 0.1),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      spacing: 20,
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.all(20),
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: [
-                                                kActiveColor.withValues(alpha: 0.3),
-                                                kActiveColor.withValues(alpha: 0.1),
-                                              ],
-                                            ),
-                                            borderRadius: BorderRadius.circular(20),
-                                          ),
-                                          child: Icon(
-                                            CupertinoIcons.cloud_upload,
-                                            size: 56,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        Column(
-                                          spacing: 8,
-                                          children: [
-                                            Text(
-                                              "请先导入直播源",
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w700,
-                                                letterSpacing: 0.5,
-                                              ),
-                                            ),
-                                            Text(
-                                              "支持 .m3u 和 .txt 格式",
-                                              style: TextStyle(
-                                                color: Colors.white.withValues(alpha: 0.6),
-                                                fontSize: 14,
-                                                letterSpacing: 0.3,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 8),
-                                        CupertinoButton.filled(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 24,
-                                            vertical: 14,
-                                          ),
-                                          borderRadius: BorderRadius.circular(12),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            spacing: 8,
-                                            children: [
-                                              Icon(CupertinoIcons.plus, size: 18),
-                                              Flexible(
-                                                child: Text(
-                                                  "导入直播源",
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          onPressed: () {
-                                            scaffoldKey.currentState?.closeDrawer();
-                                            importLiveSource();
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              : Column(
+                          child: Column(
                             children: [
                               Expanded(
                                 child: SmoothListView.builder(
@@ -855,30 +673,23 @@ class TVUIState extends State<TVUI>
                                           child: ListTile(
                                             dense: true,
                                             selected: isSelected,
-                                            selectedTileColor: kActiveColor.withValues(alpha: 0.3),
+                                            selectedTileColor: kActiveColor,
                                             hoverColor: Colors.white
-                                                .withValues(alpha: 0.08),
+                                                .withValues(alpha: 0.1),
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            contentPadding: EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 4,
+                                                  BorderRadius.circular(8),
                                             ),
                                             title: Text(
                                               name,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
-                                                color: isSelected
-                                                    ? Colors.white
-                                                    : Colors.white.withValues(alpha: 0.9),
-                                                fontSize: 16,
+                                                color: Colors.white,
+                                                fontSize: 18,
                                                 fontWeight: isSelected
                                                     ? FontWeight.w600
-                                                    : FontWeight.w500,
-                                                letterSpacing: 0.3,
+                                                    : FontWeight.normal,
                                               ),
                                             ),
                                             onFocusChange: (flag) {
@@ -909,18 +720,16 @@ class TVUIState extends State<TVUI>
                                 Container(
                                   width: double.infinity,
                                   padding: EdgeInsets.only(
-                                      bottom: 16, left: 16, right: 16),
+                                      bottom: 12, left: 12, right: 12),
                                   child: CupertinoButton.filled(
                                     sizeStyle: CupertinoButtonSize.small,
-                                    color: kActiveColor.withValues(alpha: 0.8),
-                                    borderRadius: BorderRadius.circular(12),
+                                    color: '#3e3e3e'.$color,
                                     child: Text(
                                       "关闭",
                                       style: TextStyle(
-                                        color: Colors.white,
+                                        color: '#767579'.$color,
                                         fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.5,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     onPressed: () {
@@ -961,60 +770,37 @@ class TVUIState extends State<TVUI>
                                       child: ListTile(
                                         dense: true,
                                         contentPadding:
-                                            EdgeInsets.symmetric(
-                                              horizontal: 12,
-                                              vertical: 6,
-                                            ),
+                                            EdgeInsets.only(left: 12),
                                         selected: isSelected,
-                                        selectedTileColor: kActiveColor.withValues(alpha: 0.3),
+                                        selectedTileColor: kActiveColor,
                                         hoverColor:
-                                            Colors.white.withValues(alpha: 0.08),
+                                            Colors.white.withValues(alpha: 0.1),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(12),
+                                              BorderRadius.circular(8),
                                         ),
                                         title: Text(
                                           tv.name,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
-                                            color: isSelected
-                                                ? Colors.white
-                                                : Colors.white.withValues(alpha: 0.9),
-                                            fontSize: 15,
+                                            color: Colors.white,
+                                            fontSize: 16,
                                             fontWeight: isSelected
                                                 ? FontWeight.w600
-                                                : FontWeight.w500,
-                                            letterSpacing: 0.2,
+                                                : FontWeight.normal,
                                           ),
                                         ),
-                                        leading: Container(
-                                          width: 44,
-                                          height: 44,
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withValues(alpha: 0.1),
-                                            borderRadius: BorderRadius.circular(10),
+                                        leading: CachedNetworkImage(
+                                          width: 48,
+                                          height: double.infinity,
+                                          imageUrl: tv.logo!,
+                                          errorWidget: (_, __, ___) => Icon(
+                                            Icons.live_tv,
+                                            size: 32,
                                           ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(10),
-                                            child: CachedNetworkImage(
-                                              imageUrl: tv.logo!,
-                                              fit: BoxFit.cover,
-                                              errorWidget: (_, __, ___) => Icon(
-                                                Icons.live_tv,
-                                                size: 24,
-                                                color: Colors.white.withValues(alpha: 0.6),
-                                              ),
-                                              placeholder: (_, __) => Center(
-                                                child: SizedBox(
-                                                  width: 20,
-                                                  height: 20,
-                                                  child: CupertinoActivityIndicator(
-                                                    radius: 10,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
+                                          placeholder: (_, __) => Center(
+                                            child: CupertinoActivityIndicator(),
                                           ),
                                         ),
                                         onTap: () {
@@ -1046,10 +832,7 @@ class TVUIState extends State<TVUI>
       child: PullDownButton(
         buttonBuilder: button,
         itemBuilder: (cx) {
-          var items = <PullDownMenuEntry>[];
-          
-          // 添加现有直播源
-          for (var item in liveSourceGroups.sources) {
+          return liveSourceGroups.sources.map((item) {
             var selected = currLiveSource == item;
             var name = item.name;
             String? subTitle;
@@ -1058,7 +841,7 @@ class TVUIState extends State<TVUI>
               name = parts[0];
               subTitle = parts[1];
             }
-            items.add(PullDownMenuItem.selectable(
+            return PullDownMenuItem.selectable(
               onTap: () {
                 selectLiveSourceGroup(item);
               },
@@ -1067,24 +850,8 @@ class TVUIState extends State<TVUI>
               subtitle: subTitle,
               icon: Icons.live_tv,
               iconColor: CupertinoColors.systemGreen.resolveFrom(context),
-            ));
-          }
-          
-          // 添加分隔线（如果有现有源）
-          if (items.isNotEmpty) {
-            items.add(const PullDownMenuDivider.large());
-          }
-          
-          // 添加导入选项
-          items.add(PullDownMenuItem(
-            onTap: importLiveSource,
-            title: "导入直播源",
-            subtitle: "从本地文件导入",
-            icon: CupertinoIcons.cloud_upload,
-            iconColor: CupertinoColors.systemBlue.resolveFrom(context),
-          ));
-          
-          return items;
+            );
+          }).toList();
         },
       ),
     );
@@ -1093,46 +860,10 @@ class TVUIState extends State<TVUI>
   // https://pub.dev/packages/video_viewer
   Widget _buildVideoControls(VideoState state) {
     state.widget.controller.player.state.playing;
-    bool isDesktop = context.mediaQuery.size.width >= 600;
+    bool isDesktop = GetPlatform.isDesktop;
+    bool shouldShowTopControls = isDesktop || isMobileFullscreen;
     return Stack(
       children: [
-        // 错误提示
-        Center(
-          child: StreamBuilder<String?>(
-            stream: state.widget.controller.player.stream.error,
-            initialData: null,
-            builder: (_, cx) {
-              var error = cx.data;
-              if (error != null && error.isNotEmpty) {
-                return Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 8,
-                    children: [
-                      Icon(Icons.error_outline, color: Colors.red, size: 48),
-                      Text(
-                        "播放错误",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                      Text(
-                        error,
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                );
-              }
-              return SizedBox.shrink();
-            },
-          ),
-        ),
-        // 缓冲指示器
         Center(
           child: StreamBuilder<bool>(
             stream: state.widget.controller.player.stream.buffering,
@@ -1197,7 +928,7 @@ class TVUIState extends State<TVUI>
             ),
           ),
         ),
-        if (isDesktop)
+        if (shouldShowTopControls)
           AnimatedPositioned(
             right: 12,
             left: 12,
@@ -1206,10 +937,15 @@ class TVUIState extends State<TVUI>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildNowLiveTV(),
-                Row(
-                  spacing: 12,
-                  children: [
+                Flexible(
+                  child: _buildNowLiveTV(),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      spacing: 8,
+                      children: [
                     _buildLiveSourceButton((_, showMenu) {
                       return CupertinoButton(
                         sizeStyle: CupertinoButtonSize.small,
@@ -1242,27 +978,51 @@ class TVUIState extends State<TVUI>
                         },
                       ),
                     ),
-                    Zoom(
-                      child: CupertinoButton(
-                        sizeStyle: CupertinoButtonSize.small,
-                        color: Colors.black.withValues(alpha: .72),
-                        borderRadius: BorderRadius.circular(24),
-                        onPressed: () {
-                          homeController.setBottomNavigationBar(
-                            !homeController.showBottomNavigationBar,
-                          );
-                        },
-                        child: Row(
-                          spacing: 6,
-                          children: [
-                            Icon(Icons.open_in_full_rounded),
-                            Text("半全屏"),
-                          ],
+                    if (!isDesktop)
+                      Zoom(
+                        child: CupertinoButton(
+                          sizeStyle: CupertinoButtonSize.small,
+                          color: Colors.black.withValues(alpha: .72),
+                          borderRadius: BorderRadius.circular(24),
+                          onPressed: _toggleMobileFullscreen,
+                          child: Row(
+                            spacing: 4,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(isMobileFullscreen 
+                                ? Icons.close_fullscreen_rounded 
+                                : Icons.open_in_full_rounded,
+                                size: 18,
+                              ),
+                              if (!isMobileFullscreen) Text("全屏", style: TextStyle(fontSize: 13)),
+                            ],
+                          ),
                         ),
                       ),
+                    if (isDesktop)
+                      Zoom(
+                        child: CupertinoButton(
+                          sizeStyle: CupertinoButtonSize.small,
+                          color: Colors.black.withValues(alpha: .72),
+                          borderRadius: BorderRadius.circular(24),
+                          onPressed: () {
+                            homeController.setBottomNavigationBar(
+                              !homeController.showBottomNavigationBar,
+                            );
+                          },
+                          child: Row(
+                            spacing: 6,
+                            children: [
+                              Icon(Icons.open_in_full_rounded),
+                              Text("半全屏"),
+                            ],
+                          ),
+                        ),
+                      ),
+                      ],
                     ),
-                  ],
-                )
+                  ),
+                ),
               ],
             ),
           ),
@@ -1413,35 +1173,13 @@ class TVUIState extends State<TVUI>
                           // 全屏
                           Zoom(
                             child: IconButton(
-                              icon: const Icon(Icons.fullscreen, color: Colors.white),
-                              onPressed: () async {
-                                if (GetPlatform.isDesktop) {
-                                  bool isFullScreen =
-                                      await windowManager.isFullScreen();
-                                  windowManager.setFullScreen(!isFullScreen);
-                                } else {
-                                  var orientation =
-                                      MediaQuery.of(context).orientation;
-                                  if (orientation == Orientation.portrait) {
-                                    await SystemChrome
-                                        .setPreferredOrientations([
-                                      DeviceOrientation.landscapeLeft,
-                                      DeviceOrientation.landscapeRight,
-                                    ]);
-                                    homeController
-                                        .setBottomNavigationBar(false);
-                                  } else {
-                                    await SystemChrome
-                                        .setPreferredOrientations([
-                                      DeviceOrientation.portraitUp,
-                                      DeviceOrientation.portraitDown,
-                                    ]);
-                                    homeController.setBottomNavigationBar(true);
-                                  }
-                                  showVideoControls = false;
-                                  setState(() {});
-                                }
-                              },
+                              icon: Icon(
+                                isMobileFullscreen 
+                                  ? Icons.close_fullscreen 
+                                  : Icons.fullscreen, 
+                                color: Colors.white,
+                              ),
+                              onPressed: _toggleMobileFullscreen,
                             ),
                           ),
                         ],
@@ -1523,7 +1261,8 @@ class TVUIState extends State<TVUI>
   }
 
   Widget _buildBody() {
-    bool isDesktop = context.mediaQuery.size.width >= 600;
+    bool isDesktop = GetPlatform.isDesktop;
+    bool isSmallScreen = context.mediaQuery.size.width < 700;
     var bgWidget = Positioned.fill(
       child: Container(
         width: double.infinity,
@@ -1572,24 +1311,22 @@ class TVUIState extends State<TVUI>
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 240),
                 padding: EdgeInsets.only(
-                  bottom: homeController.showBottomNavigationBar ? kDefaultAppBottomBarHeight : 0,
+                  bottom: homeController.showBottomNavigationBar && !isMobileFullscreen 
+                    ? kDefaultAppBottomBarHeight 
+                    : 0,
                 ),
                 child: Stack(
                   children: [
-                    // 桌面端背景放在外层
-                    if (isDesktop) bgWidget,
-                    // 主要内容
+                    if (isDesktop && !isMobileFullscreen) bgWidget,
                     Positioned.fill(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            flex: 6,
+                            flex: isMobileFullscreen ? 1 : 6,
                             child: Stack(
                               children: [
-                                // 背景放在最底层
-                                if (!isDesktop) bgWidget,
-                                // 视频放在背景之上
+                                if (!isDesktop && !isMobileFullscreen) bgWidget,
                                 Positioned.fill(
                                   child: Video(
                                     controller: controller,
@@ -1601,28 +1338,19 @@ class TVUIState extends State<TVUI>
                               ],
                             ),
                           ),
-                          if (context.mediaQuery.size.width < 700)
+                          if (isSmallScreen && !isMobileFullscreen)
                             Expanded(
                               flex: 9,
                               child: Container(
                                 width: double.infinity,
                                 height: double.infinity,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      '#313131'.$color,
-                                      '#2a2a2a'.$color,
-                                    ],
-                                  ),
-                                ),
+                                color: '#313131'.$color,
                                 child: Column(
                                   children: [
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
-                                        horizontal: 16,
+                                        vertical: 12,
+                                        horizontal: 12,
                                       ),
                                       child: Row(
                                         spacing: 12,
@@ -1638,17 +1366,15 @@ class TVUIState extends State<TVUI>
                                                 maxWidth: 142,
                                               ),
                                               child: CupertinoButton.filled(
-                                                color: Colors.white.withValues(alpha: 0.1),
+                                                color: '#3e3e3e'.$color,
                                                 sizeStyle:
                                                     CupertinoButtonSize.small,
                                                 padding: EdgeInsets.symmetric(
-                                                  horizontal: 14,
-                                                  vertical: 10,
+                                                  horizontal: 12,
                                                 ),
-                                                borderRadius: BorderRadius.circular(12),
                                                 onPressed: showMenu,
                                                 child: Row(
-                                                  spacing: 8,
+                                                  spacing: 6,
                                                   children: [
                                                     Expanded(
                                                       child: Text(
@@ -1656,17 +1382,14 @@ class TVUIState extends State<TVUI>
                                                         overflow: TextOverflow.ellipsis,
                                                         maxLines: 1,
                                                         style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.w500,
+                                                          color: '#767579'.$color,
                                                         ),
                                                       ),
                                                     ),
                                                     Icon(
                                                       CupertinoIcons
                                                           .chevron_down,
-                                                      color: Colors.white.withValues(alpha: 0.7),
-                                                      size: 16,
+                                                      color: '#8e8e92'.$color,
                                                     ),
                                                   ],
                                                 ),
@@ -1679,14 +1402,12 @@ class TVUIState extends State<TVUI>
                                                 maxWidth: 120,
                                               ),
                                               child: CupertinoButton.filled(
-                                                color: Colors.white.withValues(alpha: 0.1),
+                                                color: '#3e3e3e'.$color,
                                                 sizeStyle:
                                                     CupertinoButtonSize.medium,
                                                 padding: EdgeInsets.symmetric(
-                                                  horizontal: 14,
-                                                  vertical: 10,
+                                                  horizontal: 12,
                                                 ),
-                                                borderRadius: BorderRadius.circular(12),
                                                 child: Row(
                                                   children: [
                                                     Expanded(
@@ -1705,17 +1426,15 @@ class TVUIState extends State<TVUI>
                                                           overflow: TextOverflow.ellipsis,
                                                         maxLines: 1,
                                                           style: TextStyle(
-                                                              color: Colors.white,
-                                                              fontSize: 14,
-                                                              fontWeight: FontWeight.w500),
+                                                              color:
+                                                                  '#767579'.$color),
                                                         );
                                                       }),
                                                     ),
                                                     Icon(
                                                         CupertinoIcons
                                                             .chevron_down,
-                                                        color: Colors.white.withValues(alpha: 0.7),
-                                                        size: 16),
+                                                        color: '#8e8e92'.$color),
                                                   ],
                                                 ),
                                                 onPressed: () {
@@ -1730,52 +1449,26 @@ class TVUIState extends State<TVUI>
                                     Expanded(
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              '#3a3a3a'.$color,
-                                              '#353535'.$color,
-                                            ],
-                                          ),
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(20),
-                                            topRight: Radius.circular(20),
-                                          ),
+                                          color: '#3a3a3a'.$color,
                                         ),
                                         padding: EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                          vertical: 8,
+                                          horizontal: 12,
                                         ),
                                         child: Builder(builder: (context) {
                                           var tvs = currTVS;
                                           if (tvs.isEmpty) {
                                             return Center(
                                               child: Column(
-                                                spacing: 16,
+                                                spacing: 12,
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  Container(
-                                                    padding: EdgeInsets.all(20),
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.white.withValues(alpha: 0.05),
-                                                      borderRadius: BorderRadius.circular(16),
-                                                    ),
-                                                    child: Icon(
-                                                      CupertinoIcons
-                                                          .bubble_middle_bottom,
-                                                      size: 48,
-                                                      color: Colors.white.withValues(alpha: 0.6),
-                                                    ),
+                                                  Icon(
+                                                    CupertinoIcons
+                                                        .bubble_middle_bottom,
+                                                    size: 66,
+                                                    color: Colors.white,
                                                   ),
-                                                  Text(
-                                                    "请先选择频道 :)"
-                                                    , style: TextStyle(
-                                                      color: Colors.white.withValues(alpha: 0.7),
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.w500,
-                                                    ),
-                                                  ),
+                                                  Text("请先选择频道 :)", style: TextStyle(color: Colors.white),),
                                                   SizedBox(
                                                     height: context.mediaQuery
                                                             .size.height *
@@ -1795,14 +1488,14 @@ class TVUIState extends State<TVUI>
                                                 color: Colors.transparent,
                                                 child: Padding(
                                                   padding: const EdgeInsets
-                                                      .symmetric(vertical: 4),
+                                                      .symmetric(vertical: 3),
                                                   child: ListTile(
                                                     dense: true,
                                                     shape:
                                                         RoundedRectangleBorder(
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                              12),
+                                                              8),
                                                     ),
                                                     onTap: () {
                                                       currTVIdx = idx;
@@ -1811,98 +1504,62 @@ class TVUIState extends State<TVUI>
                                                     },
                                                     selected: isSelected,
                                                     contentPadding:
-                                                        EdgeInsets.symmetric(
-                                                          horizontal: 12,
-                                                          vertical: 8,
-                                                        ),
+                                                        EdgeInsets.zero,
                                                     selectedTileColor:
-                                                        kActiveColor.withValues(alpha: 0.3),
+                                                        kActiveColor,
                                                     hoverColor: Colors.white
                                                         .withValues(
-                                                            alpha: 0.08),
-                                                    leading: Container(
-                                                      width: 72,
-                                                      height: 72,
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.white.withValues(alpha: 0.08),
-                                                        borderRadius: BorderRadius.circular(14),
-                                                        border: Border.all(
-                                                          color: Colors.white.withValues(alpha: 0.1),
-                                                          width: 1,
-                                                        ),
+                                                            alpha: 0.42),
+                                                    leading: CachedNetworkImage(
+                                                      width: 80,
+                                                      height: double.infinity,
+                                                      imageUrl: item.logo ?? "",
+                                                      errorWidget:
+                                                          (_, __, ___) => Icon(
+                                                        Icons.live_tv,
+                                                        size: 48,
                                                       ),
-                                                      child: ClipRRect(
-                                                        borderRadius: BorderRadius.circular(14),
-                                                        child: CachedNetworkImage(
-                                                          imageUrl: item.logo ?? "",
-                                                          fit: BoxFit.cover,
-                                                          errorWidget:
-                                                              (_, __, ___) => Icon(
-                                                            Icons.live_tv,
-                                                            size: 32,
-                                                            color: Colors.white.withValues(alpha: 0.5),
-                                                          ),
-                                                          placeholder: (_, __) =>
-                                                              Center(
-                                                            child:
-                                                                CupertinoActivityIndicator(
-                                                                  radius: 12,
-                                                                ),
-                                                          ),
-                                                        ),
+                                                      placeholder: (_, __) =>
+                                                          Center(
+                                                        child:
+                                                            CupertinoActivityIndicator(),
                                                       ),
                                                     ),
                                                     title: Text(
                                                       item.name,
                                                       style: TextStyle(
-                                                        color: isSelected
-                                                            ? Colors.white
-                                                            : Colors.white.withValues(alpha: 0.9),
-                                                        fontSize: 18,
+                                                        color: Colors.white,
+                                                        fontSize: 28,
                                                         fontWeight: isSelected
                                                             ? FontWeight.w600
-                                                            : FontWeight.w500,
-                                                        letterSpacing: 0.3,
+                                                            : FontWeight.normal,
                                                       ),
                                                     ),
-                                                    subtitle: Padding(
-                                                      padding: EdgeInsets.only(top: 6),
-                                                      child: Row(
-                                                        children: [
-                                                          Container(
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              gradient: LinearGradient(
-                                                                colors: [
-                                                                  kActiveColor.withValues(alpha: 0.3),
-                                                                  kActiveColor.withValues(alpha: 0.2),
-                                                                ],
-                                                              ),
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10),
-                                                              border: Border.all(
-                                                                color: kActiveColor.withValues(alpha: 0.3),
-                                                                width: 1,
-                                                              ),
-                                                            ),
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                              vertical: 4,
-                                                              horizontal: 12,
-                                                            ),
-                                                            child: Text(
-                                                              item.groupName,
-                                                              style: TextStyle(
-                                                                  color: Colors.white,
-                                                                  fontSize: 12,
-                                                                  fontWeight: FontWeight.w500,
-                                                                  letterSpacing: 0.2),
-                                                            ),
+                                                    subtitle: Row(
+                                                      children: [
+                                                        Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: '#2a2a2a'
+                                                                .$color,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12),
                                                           ),
-                                                        ],
-                                                      ),
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                            vertical: 3,
+                                                            horizontal: 12,
+                                                          ),
+                                                          child: Text(
+                                                            item.groupName,
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white),
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ),
                                                 ),

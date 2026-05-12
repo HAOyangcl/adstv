@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "io.github.d1y.catmovie"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973" // flutter.ndkVersion
+    ndkVersion = "28.2.13676358" // Updated for jni plugin compatibility
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
