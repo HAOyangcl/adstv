@@ -442,20 +442,21 @@ class HomeController extends GetxController
 
   /// [isFirst] 初始化加载数据需要将 [isLoading] => true
   /// [missIsLoading] 某些特殊情况下不需要设置 [isLoading] => true
-  Future<void> updateHomeData(
-      {bool isFirst = false, missIsLoading = false}) async {
+  Future<void> updateHomeData({
+    bool isFirst = false,
+    bool missIsLoading = false,
+  }) async {
     /// 如果都没有源, 则不需要加载数据
-    /// => +_+ 还玩个球啊
     if (mirrorListIsEmpty) return;
 
     var onceCategory = "";
     if (currentCategoryerNow != null) {
       onceCategory = currentCategoryerNow!.id;
     }
+
     if (isFirst) {
       var dispose = showLoading("加载分类中");
 
-      // NOTE(d1y): 不存在分类并且请求次数没有超过阈值
       var needFetch = !currentHasCategoryer &&
           !cacheCategory.fetchCountAlreadyMax(currentMirrorItemId);
 
@@ -482,8 +483,6 @@ class HomeController extends GetxController
       }
     }
 
-    /// 如果 [indexHomeLoadDataErrorMessage] 错误栈有内容的话
-    /// 并且 [isFirst] 不是初始化数据的话, 就不允许加载更多
     if (indexHomeLoadDataErrorMessage != "" && !isFirst) return;
 
     try {
@@ -493,21 +492,118 @@ class HomeController extends GetxController
         page = 1;
         update();
       }
-      debugPrint("get home data: $page, $limit");
-      List<VideoDetail> data = await currentMirrorItem.getHome(
-        page: page,
-        limit: limit,
-        category: onceCategory,
-      );
+
+      debugPrint(
+          "get home data: $page, $limit, 当前源: ${currentMirrorItem.meta.name}");
+
+      List<VideoDetail> data = [];
+      bool loadSuccess = false;
+      String errorMessage = "";
+
+      try {
+        data = await currentMirrorItem.getHome(
+          page: page,
+          limit: limit,
+          category: onceCategory,
+        );
+        loadSuccess = data.isNotEmpty;
+        if (!loadSuccess) {
+          errorMessage = "当前源返回数据为空";
+        }
+      } catch (e) {
+        debugPrint("源 ${currentMirrorItem.meta.name} 加载失败: $e");
+        errorMessage = e.toString();
+        loadSuccess = false;
+      }
+
+      // 如果当前源加载失败且有其他可用源，自动切换到下一个可用源
+      if (!loadSuccess && mirrorList.length > 1) {
+        debugPrint("当前源加载失败，尝试切换到下一个可用源");
+
+        // 找到下一个可用的源
+        int currentIndex = mirrorList.indexOf(currentMirrorItem);
+        ISpiderAdapter? nextAvailableSource;
+        int? nextIndex;
+
+        for (int i = 0; i < mirrorList.length; i++) {
+          if (i == currentIndex) continue;
+          try {
+            var testData = await mirrorList[i].getHome(page: 1, limit: 1);
+            if (testData.isNotEmpty) {
+              nextAvailableSource = mirrorList[i];
+              nextIndex = i;
+              break;
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+
+        // 如果找到了可用源，切换过去并显示提示
+        if (nextAvailableSource != null) {
+          _mirrorIndex = nextIndex!;
+          currentCategoryerNow = null;
+          update();
+
+          // 显示切换提示
+          EasyLoading.showInfo("已自动切换到: ${nextAvailableSource.meta.name}");
+
+          // 重新加载数据
+          await updateHomeData(isFirst: true, missIsLoading: missIsLoading);
+          return;
+        } else {
+          // 没有找到可用源，显示错误信息
+          indexHomeLoadDataErrorMessage = "所有视频源都无法访问，请检查网络或添加新源";
+          homedata = [];
+          update();
+        }
+      } else if (!loadSuccess && mirrorList.length == 1) {
+        // 只有一个源且加载失败
+        indexHomeLoadDataErrorMessage = "当前视频源无法访问，请添加其他源";
+        homedata = [];
+        update();
+      }
+
+      // 根据绅士模式过滤 NSFW 内容
+      if (!isNsfw && data.isNotEmpty) {
+        data = data.where((item) {
+          bool isNsfwItem = false;
+          if (item.extra.containsKey('nsfw') && item.extra['nsfw'] == true) {
+            isNsfwItem = true;
+          }
+          if (item.remark.isNotEmpty) {
+            List<String> sensitiveWords = ['18+', '成人', 'R18', '限制级', 'NSFW'];
+            for (var word in sensitiveWords) {
+              if (item.remark.contains(word)) {
+                isNsfwItem = true;
+                break;
+              }
+            }
+          }
+          return !isNsfwItem;
+        }).toList();
+      }
+
       if (isFirst) {
         homedata = data;
       } else {
-        homedata.addAll(data);
+        var filteredData = data;
+        if (!isNsfw && filteredData.isNotEmpty) {
+          filteredData = filteredData.where((item) {
+            bool isNsfwItem = false;
+            if (item.extra.containsKey('nsfw') && item.extra['nsfw'] == true) {
+              isNsfwItem = true;
+            }
+            return !isNsfwItem;
+          }).toList();
+        }
+        homedata.addAll(filteredData);
       }
+
       indexHomeLoadDataErrorMessage = "";
       update();
     } catch (e) {
-      indexHomeLoadDataErrorMessage = e.toString();
+      indexHomeLoadDataErrorMessage = "加载失败: ${e.toString()}";
       homedata = [];
       update();
     } finally {
@@ -518,12 +614,17 @@ class HomeController extends GetxController
     String id = currentMirrorItem.meta.id;
     bool notError = indexHomeLoadDataErrorMessage == "";
 
-    // NOTE: 只会在 [isFirst] 后存入持久化缓存
     MirrorStatusStack().pushStatus(
       id,
       notError,
       canSave: isFirst,
     );
+  }
+
+  void refreshHomeDataWithFilter() {
+    homedata.clear();
+    page = 1;
+    updateHomeData(isFirst: true);
   }
 
   @override
@@ -819,7 +920,7 @@ class HomeController extends GetxController
           changeCurrentBarIndex(2);
         },
       ),
-      
+
       // 功能相关
       cmd_palette.CommandPaletteItem(
         id: 'toggle_nsfw',
@@ -832,7 +933,7 @@ class HomeController extends GetxController
           $bus.fire(SettingEvent(nsfw: isNsfw));
         },
       ),
-      
+
       cmd_palette.CommandPaletteItem(
         id: 'refresh_home',
         label: '刷新首页',
@@ -843,7 +944,7 @@ class HomeController extends GetxController
           refreshOnRefresh();
         },
       ),
-      
+
       cmd_palette.CommandPaletteItem(
         id: 'show_mirror_table',
         label: '视频源管理',
@@ -855,7 +956,7 @@ class HomeController extends GetxController
         },
       ),
     ];
-    
+
     cmd_palette.showCommandPalette(
       context: context,
       items: items,

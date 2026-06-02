@@ -144,10 +144,15 @@ class VideoDetail {
   VideoDetail mergeWith(VideoDetail neoDetail) {
     var title = neoDetail.title.isEmpty ? this.title : neoDetail.title;
     var desc = neoDetail.desc.isEmpty ? this.desc : neoDetail.desc;
-    var updateTime = neoDetail.updateTime.isEmpty ? this.updateTime : neoDetail.updateTime;
+    var updateTime =
+        neoDetail.updateTime.isEmpty ? this.updateTime : neoDetail.updateTime;
     var remark = neoDetail.remark.isEmpty ? this.remark : neoDetail.remark;
-    var bigCoverImage = neoDetail.bigCoverImage.isEmpty ? this.bigCoverImage : neoDetail.bigCoverImage;
-    var smallCoverImage = neoDetail.smallCoverImage.isEmpty ? this.smallCoverImage : neoDetail.smallCoverImage;
+    var bigCoverImage = neoDetail.bigCoverImage.isEmpty
+        ? this.bigCoverImage
+        : neoDetail.bigCoverImage;
+    var smallCoverImage = neoDetail.smallCoverImage.isEmpty
+        ? this.smallCoverImage
+        : neoDetail.smallCoverImage;
     var videos = neoDetail.videos.isEmpty ? this.videos : neoDetail.videos;
     var id = neoDetail.id.isEmpty ? this.id : neoDetail.id;
     return VideoDetail(
@@ -257,7 +262,6 @@ abstract class ISpiderAdapter {
 
 /// 基本上它就是一个空的占位符
 class EmptySpiderAdapter implements ISpiderAdapter {
-
   @override
   bool get isNsfw => false;
 
@@ -294,7 +298,6 @@ class EmptySpiderAdapter implements ISpiderAdapter {
   Future<List<String>> parseIframe(String iframe) async {
     return [];
   }
-
 }
 
 const VideoSize kDefaultVideoSize = VideoSize();

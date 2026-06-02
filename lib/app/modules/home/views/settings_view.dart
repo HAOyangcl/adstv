@@ -28,11 +28,36 @@ import 'package:settings_ui/settings_ui.dart';
 
 import 'package:xi/xi.dart';
 
-const kTelegramGroup = "https://t.me/catmovie1145";
+const kTelegramGroup = "https://t.me/ucbaidu";
+const kQQGroup = "654486119"; // QQ群号
+const kOfficialAccount = "鹏星影音"; // 公众号名称
+
+// 二维码图片URL（请替换为实际的图片地址）
+const kQQGroupQRCode =
+    "https://blog.lzphy.top/_astro/image-20260415160544679.DJmGN3Qf_Z20qTyo.webp"; // QQ群二维码
+const kOfficialAccountQRCode =
+    "https://blog.lzphy.top/_astro/image-20260415160544679.DJmGN3Qf_Z20qTyo.webp"; // 公众号二维码
+const kTelegramQRCode =
+    "https://blog.lzphy.top/_astro/image-20260415160544679.DJmGN3Qf_Z20qTyo.webp"; // Telegram二维码
 
 const kGithubIconSvg = r"""
 <svg t="1757744978460" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="13267" width="200" height="200"><path d="M512 42.666667A464.64 464.64 0 0 0 42.666667 502.186667 460.373333 460.373333 0 0 0 363.52 938.666667c23.466667 4.266667 32-9.813333 32-22.186667v-78.08c-130.56 27.733333-158.293333-61.44-158.293333-61.44a122.026667 122.026667 0 0 0-52.053334-67.413333c-42.666667-28.16 3.413333-27.733333 3.413334-27.733334a98.56 98.56 0 0 1 71.68 47.36 101.12 101.12 0 0 0 136.533333 37.973334 99.413333 99.413333 0 0 1 29.866667-61.44c-104.106667-11.52-213.333333-50.773333-213.333334-226.986667a177.066667 177.066667 0 0 1 47.36-124.16 161.28 161.28 0 0 1 4.693334-121.173333s39.68-12.373333 128 46.933333a455.68 455.68 0 0 1 234.666666 0c89.6-59.306667 128-46.933333 128-46.933333a161.28 161.28 0 0 1 4.693334 121.173333A177.066667 177.066667 0 0 1 810.666667 477.866667c0 176.64-110.08 215.466667-213.333334 226.986666a106.666667 106.666667 0 0 1 32 85.333334v125.866666c0 14.933333 8.533333 26.88 32 22.186667A460.8 460.8 0 0 0 981.333333 502.186667 464.64 464.64 0 0 0 512 42.666667" fill="#231F20" p-id="13268"></path></svg>
 """;
+
+// SVG 图标常量
+const String qqIconSvg = '''
+<svg t="1780286636639" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5183" width="200" height="200"><path d="M512.268258 64.433103c-247.183323 0-447.569968 200.380501-447.569968 447.563825 0 247.189467 200.385621 447.570992 447.569968 447.570992s447.569968-200.380501 447.569968-447.569968c0-247.184347-200.386645-447.564849-447.569968-447.564849z m252.85872 584.692787c-18.997168 16.287968-43.668709-53.628042-47.2134-42.875198-8.642616 26.161294-12.695154 43.646184-38.148944 72.127602-1.35972 1.521494 29.43056 12.647032 38.148944 36.396051 8.346713 22.756875 24.596797 58.811973-81.725503 70.125906-62.389428 6.635801-107.471099-33.244533-111.964932-32.85648-8.325212 0.734126-4.618747 0-13.568528 0-7.321804 0-7.807126 0.534468-14.69685 0-1.899307-0.140272-22.632985 32.85648-115.364231 32.85648-71.878798 0-90.48177-45.243445-76.032701-70.125906 14.464428-24.877342 38.579999-32.122354 35.176604-36.06636-16.73643-19.39546-28.287904-40.1404-35.176604-58.882621-1.705793-4.666869-3.135137-9.209848-4.262434-13.574672-2.611931-10.008479-22.627866 58.76385-44.111028 42.875198-21.483162-15.883533-19.567472-56.309597-5.659014-95.003248 14.033372-39.006959 49.37687-76.562049 49.771065-84.854496 1.412962-30.849665-3.044011-35.975235 0-44.078263 6.780169-18.149391 15.034732-11.190043 15.034733-20.609788 0-118.64476 88.172909-214.829571 196.933079-214.829571 108.755051 0 196.928984 96.184811 196.928984 214.829571 0 4.554242 11.815637 0 17.474651 20.609788 1.165181 4.256291 1.968931 20.684531 0.58771 44.078263-0.658358 11.238165 29.954789 24.914202 45.777913 84.854496 15.845649 59.945414 0 88.215912-7.909514 95.003248z" fill="#68A5E1" p-id="5184"></path></svg>
+''';
+
+const String wxIconSvg = '''
+<svg t="1780286721558" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6226" width="200" height="200"><path d="M337.387283 341.82659c-17.757225 0-35.514451 11.83815-35.514451 29.595375s17.757225 29.595376 35.514451 29.595376 29.595376-11.83815 29.595376-29.595376c0-18.49711-11.83815-29.595376-29.595376-29.595375zM577.849711 513.479769c-11.83815 0-22.936416 12.578035-22.936416 23.6763 0 12.578035 11.83815 23.676301 22.936416 23.676301 17.757225 0 29.595376-11.83815 29.595376-23.676301s-11.83815-23.676301-29.595376-23.6763zM501.641618 401.017341c17.757225 0 29.595376-12.578035 29.595376-29.595376 0-17.757225-11.83815-29.595376-29.595376-29.595375s-35.514451 11.83815-35.51445 29.595375 17.757225 29.595376 35.51445 29.595376zM706.589595 513.479769c-11.83815 0-22.936416 12.578035-22.936416 23.6763 0 12.578035 11.83815 23.676301 22.936416 23.676301 17.757225 0 29.595376-11.83815 29.595376-23.676301s-11.83815-23.676301-29.595376-23.6763z" fill="#28C445" p-id="6227"></path><path d="M510.520231 2.959538C228.624277 2.959538 0 231.583815 0 513.479769s228.624277 510.520231 510.520231 510.520231 510.520231-228.624277 510.520231-510.520231-228.624277-510.520231-510.520231-510.520231zM413.595376 644.439306c-29.595376 0-53.271676-5.919075-81.387284-12.578034l-81.387283 41.433526 22.936416-71.768786c-58.450867-41.433526-93.965318-95.445087-93.965317-159.815029 0-113.202312 105.803468-201.988439 233.803468-201.98844 114.682081 0 216.046243 71.028902 236.023121 166.473989-7.398844-0.739884-14.797688-1.479769-22.196532-1.479769-110.982659 1.479769-198.289017 85.086705-198.289017 188.67052 0 17.017341 2.959538 33.294798 7.398844 49.572255-7.398844 0.739884-15.537572 1.479769-22.936416 1.479768z m346.265896 82.867052l17.757225 59.190752-63.630058-35.514451c-22.936416 5.919075-46.612717 11.83815-70.289017 11.83815-111.722543 0-199.768786-76.947977-199.768786-172.393063-0.739884-94.705202 87.306358-171.653179 198.289017-171.65318 105.803468 0 199.028902 77.687861 199.028902 172.393064 0 53.271676-34.774566 100.624277-81.387283 136.138728z" fill="#28C445" p-id="6228"></path></svg>
+''';
+
+const String telegramIconSvg = '''
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.89 8.12l-2.43 8.44c-.19.66-.53.82-1.07.51l-2.96-2.18-1.43 1.37c-.16.16-.29.29-.6.29l.21-2.96 5.38-4.86c.24-.21-.05-.33-.37-.12L7.1 12.6l-2.86-.9c-.62-.19-.63-.62.13-.92l11.18-4.31c.52-.19.98.12.81.92l-.47 2.73z" fill="#2AABEE"/>
+</svg>
+''';
 
 enum GetBackResultType {
   /// 失败
@@ -139,13 +164,7 @@ class _SettingsViewState extends State<SettingsView>
       _videoKernel =
           getSettingAsKeyIdent<VideoKernel>(SettingsAllKey.videoKernel);
       _mirrorLength = SpiderManage.data.length;
-      // var __hapticFeedback = getSettingAsKeyIdent<bool>(
-      //   SettingsAllKey.hapticFeedback,
-      //   defaultValue: true,
-      // );
-      // _hapticFeedback = __hapticFeedback;
-      // boop.enabled = _hapticFeedback;
-      _hapticFeedback = boop.enabled; // 初始化已经在 initHapticFeedback 中做了
+      _hapticFeedback = boop.enabled;
       _showNsfwSetting = getSettingAsKeyIdent<bool>(
         SettingsAllKey.showNsfwSetting,
         defaultValue: false,
@@ -227,7 +246,6 @@ class _SettingsViewState extends State<SettingsView>
     return _mirrorLength.toString();
   }
 
-  // NOTE(d1y): 这里的 home.parseVipList 会动态更新吗?
   String get parseVipListWithText {
     if (home.parseVipList.isEmpty) {
       return "暂无";
@@ -537,20 +555,26 @@ class _SettingsViewState extends State<SettingsView>
     boop.selection();
     _copyrightClickCount++;
 
-    // 如果已经开启，点击一次即可关闭
     if (_showNsfwSetting) {
       EasyLoading.showSuccess("绅士模式已关闭");
       boop.success();
+
+      // 清空当前首页数据
+      home.homedata.clear();
+      home.update();
+
       await Future.delayed(Duration(milliseconds: 420));
       _showNsfwSetting = false;
       updateSetting(SettingsAllKey.showNsfwSetting, false);
       home.isNsfw = false;
       setState(() {});
       _copyrightClickCount = 0;
+
+      // 重新加载首页数据
+      home.refreshHomeDataWithFilter();
       return;
     }
 
-    // 未开启状态下需要 10 次点击才能开启
     var countMap = {7: "三", 8: "二", 9: "一"};
 
     if (countMap.containsKey(_copyrightClickCount)) {
@@ -560,13 +584,840 @@ class _SettingsViewState extends State<SettingsView>
     } else if (_copyrightClickCount >= 10) {
       EasyLoading.showSuccess("绅士模式已开启");
       boop.success();
+
+      // 清空当前首页数据
+      home.homedata.clear();
+      home.update();
+
       await Future.delayed(Duration(milliseconds: 420));
       _showNsfwSetting = true;
       updateSetting(SettingsAllKey.showNsfwSetting, true);
       home.isNsfw = true;
       setState(() {});
       _copyrightClickCount = 0;
+
+      // 重新加载首页数据（自动过滤 NSFW 内容）
+      home.refreshHomeDataWithFilter();
     }
+  }
+
+  // 显示QQ群对话框（美化版）
+  void _showQQGroupDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            decoration: BoxDecoration(
+              color: context.isDarkMode ? Color(0xFF1C1C1E) : Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 20,
+                  offset: Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 顶部装饰条
+                Container(
+                  height: 4,
+                  width: 40,
+                  margin: EdgeInsets.only(top: 12),
+                  decoration: BoxDecoration(
+                    color: context.isDarkMode
+                        ? Colors.grey.shade700
+                        : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                // 标题区域
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF12B7F5), Color(0xFF0D8FD9)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: SvgPicture.string(
+                          qqIconSvg,
+                          width: 24,
+                          height: 24,
+                          colorFilter:
+                              ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        "QQ交流群",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: context.isDarkMode
+                              ? Colors.white
+                              : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // 二维码区域
+                if (kQQGroupQRCode.isNotEmpty)
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.network(
+                            kQQGroupQRCode,
+                            width: 180,
+                            height: 180,
+                            fit: BoxFit.contain,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                width: 180,
+                                height: 180,
+                                color: Colors.grey.shade100,
+                                child: Center(
+                                  child: CupertinoActivityIndicator(radius: 15),
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 180,
+                                height: 180,
+                                color: Colors.grey.shade100,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.qr_code,
+                                        size: 60, color: Colors.grey.shade400),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      "二维码加载失败",
+                                      style: TextStyle(
+                                          fontSize: 12, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        // 截屏提示
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF12B7F5).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.crop_free,
+                                  size: 14, color: Color(0xFF12B7F5)),
+                              SizedBox(width: 6),
+                              Text(
+                                "截屏保存二维码",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF12B7F5),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                // 群号区域
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: context.isDarkMode
+                        ? Colors.white.withOpacity(0.05)
+                        : Colors.black.withOpacity(0.03),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: context.isDarkMode
+                          ? Colors.white.withOpacity(0.1)
+                          : Colors.black.withOpacity(0.05),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "群号",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: context.isDarkMode
+                              ? Colors.white70
+                              : Colors.black54,
+                        ),
+                      ),
+                      SelectableText(
+                        kQQGroup,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: context.isDarkMode
+                              ? Colors.white
+                              : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // 提示文字
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    "📱 截屏保存二维码，或复制群号打开QQ搜索加入",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color:
+                          context.isDarkMode ? Colors.white54 : Colors.black45,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                // 按钮区域
+                Container(
+                  margin: EdgeInsets.fromLTRB(16, 16, 16, 20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CupertinoButton(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          borderRadius: BorderRadius.circular(12),
+                          color: context.isDarkMode
+                              ? Colors.white.withOpacity(0.1)
+                              : Colors.grey.shade100,
+                          child: Text(
+                            "取消",
+                            style: TextStyle(
+                              color: context.isDarkMode
+                                  ? Colors.white70
+                                  : Colors.black54,
+                              fontSize: 15,
+                            ),
+                          ),
+                          onPressed: () => Get.back(),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: CupertinoButton(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          borderRadius: BorderRadius.circular(12),
+                          color: Color(0xFF12B7F5),
+                          child: Text(
+                            "复制群号",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: kQQGroup));
+                            EasyLoading.showSuccess("群号已复制");
+                            Get.back();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // 显示公众号对话框（美化版）
+  void _showOfficialAccountDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            decoration: BoxDecoration(
+              color: context.isDarkMode ? Color(0xFF1C1C1E) : Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 20,
+                  offset: Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 顶部装饰条
+                Container(
+                  height: 4,
+                  width: 40,
+                  margin: EdgeInsets.only(top: 12),
+                  decoration: BoxDecoration(
+                    color: context.isDarkMode
+                        ? Colors.grey.shade700
+                        : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                // 标题区域
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF07C160), Color(0xFF059F4C)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: SvgPicture.string(
+                          wxIconSvg,
+                          width: 24,
+                          height: 24,
+                          colorFilter:
+                              ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        "微信公众号",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: context.isDarkMode
+                              ? Colors.white
+                              : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // 二维码区域
+                if (kOfficialAccountQRCode.isNotEmpty)
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.network(
+                            kOfficialAccountQRCode,
+                            width: 180,
+                            height: 180,
+                            fit: BoxFit.contain,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                width: 180,
+                                height: 180,
+                                color: Colors.grey.shade100,
+                                child: Center(
+                                  child: CupertinoActivityIndicator(radius: 15),
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 180,
+                                height: 180,
+                                color: Colors.grey.shade100,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.qr_code,
+                                        size: 60, color: Colors.grey.shade400),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      "二维码加载失败",
+                                      style: TextStyle(
+                                          fontSize: 12, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        // 截屏提示
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF07C160).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.crop_free,
+                                  size: 14, color: Color(0xFF07C160)),
+                              SizedBox(width: 6),
+                              Text(
+                                "截屏保存二维码",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF07C160),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                // 公众号名称区域
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: context.isDarkMode
+                        ? Colors.white.withOpacity(0.05)
+                        : Colors.black.withOpacity(0.03),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: context.isDarkMode
+                          ? Colors.white.withOpacity(0.1)
+                          : Colors.black.withOpacity(0.05),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "公众号",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: context.isDarkMode
+                              ? Colors.white70
+                              : Colors.black54,
+                        ),
+                      ),
+                      SelectableText(
+                        kOfficialAccount,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: context.isDarkMode
+                              ? Colors.white
+                              : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // 提示文字
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    "📱 截屏保存二维码，或复制名称在微信中搜索关注",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color:
+                          context.isDarkMode ? Colors.white54 : Colors.black45,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                // 按钮区域
+                Container(
+                  margin: EdgeInsets.fromLTRB(16, 16, 16, 20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CupertinoButton(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          borderRadius: BorderRadius.circular(12),
+                          color: context.isDarkMode
+                              ? Colors.white.withOpacity(0.1)
+                              : Colors.grey.shade100,
+                          child: Text(
+                            "取消",
+                            style: TextStyle(
+                              color: context.isDarkMode
+                                  ? Colors.white70
+                                  : Colors.black54,
+                              fontSize: 15,
+                            ),
+                          ),
+                          onPressed: () => Get.back(),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: CupertinoButton(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          borderRadius: BorderRadius.circular(12),
+                          color: Color(0xFF07C160),
+                          child: Text(
+                            "复制名称",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onPressed: () {
+                            Clipboard.setData(
+                                ClipboardData(text: kOfficialAccount));
+                            EasyLoading.showSuccess("公众号名称已复制");
+                            Get.back();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // 显示Telegram对话框（美化版）
+  // 显示Telegram对话框（美化版）
+  void _showTelegramDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.symmetric(horizontal: 24),
+          child: Container(
+            decoration: BoxDecoration(
+              color: context.isDarkMode ? Color(0xFF1C1C1E) : Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 20,
+                  offset: Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 顶部装饰条
+                Container(
+                  height: 4,
+                  width: 40,
+                  margin: EdgeInsets.only(top: 12),
+                  decoration: BoxDecoration(
+                    color: context.isDarkMode
+                        ? Colors.grey.shade700
+                        : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                // 标题区域
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF2AABEE), Color(0xFF229ED9)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: SvgPicture.string(
+                          telegramIconSvg,
+                          width: 24,
+                          height: 24,
+                          colorFilter:
+                              ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        "Telegram 群组",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: context.isDarkMode
+                              ? Colors.white
+                              : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // 二维码区域
+                if (kTelegramQRCode.isNotEmpty)
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.network(
+                            kTelegramQRCode,
+                            width: 180,
+                            height: 180,
+                            fit: BoxFit.contain,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                width: 180,
+                                height: 180,
+                                color: Colors.grey.shade100,
+                                child: Center(
+                                  child: CupertinoActivityIndicator(radius: 15),
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 180,
+                                height: 180,
+                                color: Colors.grey.shade100,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.qr_code,
+                                        size: 60, color: Colors.grey.shade400),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      "二维码加载失败",
+                                      style: TextStyle(
+                                          fontSize: 12, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        // 截屏提示
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF2AABEE).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.crop_free,
+                                  size: 14, color: Color(0xFF2AABEE)),
+                              SizedBox(width: 6),
+                              Text(
+                                "截屏保存二维码",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF2AABEE),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                // 链接区域 - 左右布局
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: context.isDarkMode
+                        ? Colors.white.withOpacity(0.05)
+                        : Colors.black.withOpacity(0.03),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: context.isDarkMode
+                          ? Colors.white.withOpacity(0.1)
+                          : Colors.black.withOpacity(0.05),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "链接",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: context.isDarkMode
+                              ? Colors.white70
+                              : Colors.black54,
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(left: 12),
+                          child: SelectableText(
+                            kTelegramGroup,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: context.isDarkMode
+                                  ? Colors.white
+                                  : Colors.black87,
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // 提示文字
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    "📱 截屏保存二维码，或复制链接打开浏览器加入",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color:
+                          context.isDarkMode ? Colors.white54 : Colors.black45,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                // 按钮区域
+                Container(
+                  margin: EdgeInsets.fromLTRB(16, 16, 16, 20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CupertinoButton(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          borderRadius: BorderRadius.circular(12),
+                          color: context.isDarkMode
+                              ? Colors.white.withOpacity(0.1)
+                              : Colors.grey.shade100,
+                          child: Text(
+                            "取消",
+                            style: TextStyle(
+                              color: context.isDarkMode
+                                  ? Colors.white70
+                                  : Colors.black54,
+                              fontSize: 15,
+                            ),
+                          ),
+                          onPressed: () => Get.back(),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: CupertinoButton(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          borderRadius: BorderRadius.circular(12),
+                          color: Color(0xFF2AABEE),
+                          child: Text(
+                            "复制链接",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onPressed: () {
+                            Clipboard.setData(
+                                ClipboardData(text: kTelegramGroup));
+                            EasyLoading.showSuccess("链接已复制");
+                            Get.back();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget leadingIcon(String icon, {double? width, double? height}) {
@@ -625,7 +1476,6 @@ class _SettingsViewState extends State<SettingsView>
                       boop.success();
                     },
                     initialValue: isDark,
-                    // leading: Icon(Icons.settings_brightness),
                     leading: leadingIcon(r"""
 <svg t="1758654524737" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9044" width="200" height="200"><path d="M535.369874 104.082286l107.52 217.819428a54.857143 54.857143 0 0 0 41.398857 30.134857l240.566858 34.816a54.857143 54.857143 0 0 1 30.427428 93.842286l-173.933714 169.764572a54.857143 54.857143 0 0 0-15.872 48.566857l40.886857 238.884571a54.857143 54.857143 0 0 1-79.798857 57.856l-215.04-112.713143a54.857143 54.857143 0 0 0-51.2 0l-215.04 113.005715a54.857143 54.857143 0 0 1-79.798857-58.514286l41.179428-239.469714a54.857143 54.857143 0 0 0-15.945143-48.566858L16.787017 480.256A54.857143 54.857143 0 0 1 46.921874 386.413714l240.274286-34.816a54.857143 54.857143 0 0 0 41.398857-30.134857l107.812572-217.819428a54.857143 54.857143 0 0 1 98.742857 0z" fill="#404053" p-id="9045"></path></svg>
 """),
@@ -641,17 +1491,14 @@ class _SettingsViewState extends State<SettingsView>
                     boop.success();
                   },
                   initialValue: autoDarkMode,
-                  // leading: Icon(CupertinoIcons.moon_stars_fill),
                   leading: leadingIcon(r"""
 <svg t="1758654465566" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8017" width="200" height="200"><path d="M900.3008 597.2992a46.9504 46.9504 0 0 0-47.0016-46.8992H768a46.8992 46.8992 0 0 0-46.848 46.8992v256c0 25.9072 20.992 46.9504 46.848 46.9504h85.3504c25.9584 0 47.0016-20.992 47.0016-46.9504v-256z m-170.752-256V256a46.9504 46.9504 0 0 0-46.848-46.9504h-512A46.9504 46.9504 0 0 0 123.7504 256v298.6496a46.9504 46.9504 0 0 0 46.9504 46.9504H512a38.4 38.4 0 0 1 0 76.8h-46.8992v93.8496H512a38.4 38.4 0 0 1 0 76.8H298.6496a38.4 38.4 0 0 1 0-76.8h89.6V678.4h-217.6a123.8016 123.8016 0 0 1-123.6992-123.7504V256a123.7504 123.7504 0 0 1 123.7504-123.7504h512A123.8016 123.8016 0 0 1 806.2976 256v85.2992a38.4 38.4 0 0 1-76.8 0z m247.552 512a123.7504 123.7504 0 0 1-123.8016 123.7504H768a123.7504 123.7504 0 0 1-123.648-123.7504v-256a123.6992 123.6992 0 0 1 123.648-123.6992h85.3504a123.7504 123.7504 0 0 1 123.8016 123.6992v256z" p-id="8018"></path></svg>
 """, width: 25, height: 25),
                   title: Text('跟随系统主题'),
                 ),
                 if (false)
-                  // ignore: dead_code
                   SettingsTile.navigation(
                     leading: Icon(Icons.add_box),
-                    // TODO(d1y): impl this
                     title: Text('解析线路管理'),
                     onPressed: (cx) {
                       EasyLoading.dismiss();
@@ -745,6 +1592,47 @@ class _SettingsViewState extends State<SettingsView>
               ],
             ),
             SettingsSection(
+              title: Text('联系我们'),
+              tiles: <AbstractSettingsTile>[
+                SettingsTile.navigation(
+                  leading: SvgPicture.string(
+                    telegramIconSvg,
+                    width: 24,
+                    height: 24,
+                  ),
+                  title: Text('Telegram 群组'),
+                  onPressed: (cx) {
+                    boop.selection();
+                    _showTelegramDialog();
+                  },
+                ),
+                SettingsTile.navigation(
+                  leading: SvgPicture.string(
+                    qqIconSvg,
+                    width: 24,
+                    height: 24,
+                  ),
+                  title: Text('QQ交流群'),
+                  onPressed: (cx) {
+                    boop.selection();
+                    _showQQGroupDialog();
+                  },
+                ),
+                SettingsTile.navigation(
+                  leading: SvgPicture.string(
+                    wxIconSvg,
+                    width: 24,
+                    height: 24,
+                  ),
+                  title: Text('微信公众号'),
+                  onPressed: (cx) {
+                    boop.selection();
+                    _showOfficialAccountDialog();
+                  },
+                ),
+              ],
+            ),
+            SettingsSection(
               title: Text('其他设置'),
               tiles: <AbstractSettingsTile>[
                 SettingsTile.navigation(
@@ -760,22 +1648,13 @@ class _SettingsViewState extends State<SettingsView>
                     );
                   },
                 ),
-                if (false)
-                  // ignore: dead_code
-                  SettingsTile.navigation(
-                    leading: Icon(CupertinoIcons.arrow_down_right_square_fill),
-                    title: Text('视频源帮助'),
-                    onPressed: (cx) {
-                      boop.selection();
-                      Get.to(() => const SourceHelpTable());
-                    },
-                  ),
                 SettingsTile.navigation(
-                  leading: leadingIcon(r"""
-<svg t="1758539890582" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7854" width="200" height="200"><path d="M279.779556 206.648889a57.571556 57.571556 0 1 1 57.571555 57.315555 56.888889 56.888889 0 0 1-57.571555-57.315555z m292.736 747.918222c0 0.967111-1.948444 1.948444-2.929778 1.948445l-97.578667-58.311112a3.555556 3.555556 0 0 1-0.995555-2.915555c8.803556-19.427556 97.592889-202.993778 87.836444-193.28a1243.022222 1243.022222 0 0 0-116.124444 139.861333l-26.339556 35.939556s-102.4-68.977778-134.656-111.701334c0-0.967111-0.995556-0.967111 0-1.934222 20.48-25.258667 129.777778-166.087111 129.777778-166.087111l-184.433778 110.734222h-2.929778c-8.789333-9.713778-70.257778-77.710222-88.789333-109.752889v-1.948444c17.564444-14.563556 117.091556-98.133333 117.091555-98.133333l-140.515555 49.536a3.598222 3.598222 0 0 1-2.929778-0.967111l-51.726222-97.137778a1.863111 1.863111 0 0 1 0.981333-2.915556c24.405333-4.835556 230.286222-47.573333 330.794667-116.622222 2.460444-1.692444 5.831111-1.28 7.808 0.981333l287.857778 286.535111c2.261333 1.962667 2.673778 5.319111 0.981333 7.779556a894.904889 894.904889 0 0 0-113.208889 328.291556l0.028445 0.099555z m199.111111-115.584a72.206222 72.206222 0 1 1-72.206223-71.879111 71.879111 71.879111 0 0 1 72.206223 71.879111z m55.608889-36.977778a38.855111 38.855111 0 1 1 38.926222-38.727111 39.054222 39.054222 0 0 1-39.025778 38.855111l0.113778-0.142222z m119.992888-630.371555L765.724444 353.251556c0 2.929778-0.995556 3.896889-0.995555 6.812444 41.002667 69.930667 40.021333 150.556444-19.498667 212.721778a4.736 4.736 0 0 1-6.826666 0L450.56 285.283556a4.664889 4.664889 0 0 1 0-6.798223c62.435556-59.249778 143.445333-59.249778 213.703111-19.427555 2.304 0.099556 4.622222-0.241778 6.826667-0.967111l182.471111-180.622223a66.432 66.432 0 1 1 93.667555 94.151112z" fill="#323233" p-id="7855"></path></svg>
-"""),
-                  title: Text('清除缓存'),
-                  onPressed: handleCleanCacheBefore,
+                  leading: Icon(CupertinoIcons.arrow_down_right_square_fill),
+                  title: Text('视频源帮助'),
+                  onPressed: (cx) {
+                    boop.selection();
+                    Get.to(() => const SourceHelpTable());
+                  },
                 ),
                 SettingsTile.navigation(
                   leading: leadingIcon(kGithubIconSvg),
@@ -792,20 +1671,6 @@ class _SettingsViewState extends State<SettingsView>
                         child: cupertinoLicensePage,
                       ),
                     );
-                  },
-                ),
-                SettingsTile.navigation(
-                  leading: SvgPicture.string(
-                    r"""
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 256 256"><defs><linearGradient id="IconifyId19941a896f9bb1d3b1" x1="50%" x2="50%" y1="0%" y2="100%"><stop offset="0%" stop-color="#2AABEE"/><stop offset="100%" stop-color="#229ED9"/></linearGradient></defs><path fill="url(#IconifyId19941a896f9bb1d3b1)" d="M128 0C94.06 0 61.48 13.494 37.5 37.49A128.04 128.04 0 0 0 0 128c0 33.934 13.5 66.514 37.5 90.51C61.48 242.506 94.06 256 128 256s66.52-13.494 90.5-37.49c24-23.996 37.5-56.576 37.5-90.51s-13.5-66.514-37.5-90.51C194.52 13.494 161.94 0 128 0"/><path fill="#FFF" d="M57.94 126.648q55.98-24.384 74.64-32.152c35.56-14.786 42.94-17.354 47.76-17.441c1.06-.017 3.42.245 4.96 1.49c1.28 1.05 1.64 2.47 1.82 3.467c.16.996.38 3.266.2 5.038c-1.92 20.24-10.26 69.356-14.5 92.026c-1.78 9.592-5.32 12.808-8.74 13.122c-7.44.684-13.08-4.912-20.28-9.63c-11.26-7.386-17.62-11.982-28.56-19.188c-12.64-8.328-4.44-12.906 2.76-20.386c1.88-1.958 34.64-31.748 35.26-34.45c.08-.338.16-1.598-.6-2.262c-.74-.666-1.84-.438-2.64-.258c-1.14.256-19.12 12.152-54 35.686c-5.1 3.508-9.72 5.218-13.88 5.128c-4.56-.098-13.36-2.584-19.9-4.708c-8-2.606-14.38-3.984-13.82-8.41c.28-2.304 3.46-4.662 9.52-7.072"/></svg>
-""",
-                    width: 24,
-                    height: 24,
-                  ),
-                  title: Text('小猫交流群'),
-                  onPressed: (cx) {
-                    boop.selection();
-                    kTelegramGroup.openURL();
                   },
                 ),
                 Copyright(
@@ -856,17 +1721,15 @@ class Copyright extends AbstractSettingsTile {
           onTap?.call();
         },
         child: Builder(builder: (context) {
-          var firstWriteYear = '2020';
+          var firstWriteYear = '2026';
           String currentYearString = DateTime.now().year.toString();
-          var text = "© 小猫影视 ";
+          var text = "© 雕将军 ";
           text += "$firstWriteYear-$currentYearString ";
-          // text += "$gitTag($gitCommit)";
           return HoverCursor(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 text,
-                // textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
                   color: (Get.isDarkMode ? Colors.white : Colors.black)

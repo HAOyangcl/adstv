@@ -168,6 +168,7 @@ class _MirrorTableViewState extends State<MirrorTableView>
         if (result.isNotEmpty) {
           home.updateMirrorIndex(0);
         }
+        EasyLoading.showSuccess("已删除 ${result.length} 个失效源");
         break;
       case MenuActionType.export:
         String append = SpiderManage.export(
@@ -179,23 +180,45 @@ class _MirrorTableViewState extends State<MirrorTableView>
             "${today.year.toString()}${today.month.toString().padLeft(2, '0')}${today.day.toString().padLeft(2, '0')}";
 
         String filename = "YY$dateSlug.json";
-        if (GetPlatform.isIOS) {
-          Directory directory = await getTemporaryDirectory();
-          String path = '${directory.path}/$filename';
-          File file = File(path);
-          await file.writeAsString(append);
-          SharePlus.instance.share(ShareParams(files: [XFile(path)]));
-        } else if (GetPlatform.isDesktop) {
-          Directory? directory = await getDownloadsDirectory();
-          if (directory == null) return;
-          String? path = await FilePicker.platform.saveFile(
-            initialDirectory: directory.path,
-            fileName: filename,
-          );
-          if (path == null) return;
-          File file = File(path);
-          file.existsSync();
-          file.writeAsStringSync(append);
+
+        try {
+          if (GetPlatform.isIOS) {
+            Directory directory = await getTemporaryDirectory();
+            String path = '${directory.path}/$filename';
+            File file = File(path);
+            await file.writeAsString(append);
+            await Share.shareXFiles([XFile(path)], text: '视频源导出文件');
+            EasyLoading.showSuccess("导出成功");
+          } else if (GetPlatform.isAndroid) {
+            Directory? directory = await getExternalStorageDirectory();
+            if (directory == null) {
+              EasyLoading.showError("无法获取存储目录");
+              return;
+            }
+            String path = '${directory.path}/$filename';
+            File file = File(path);
+            await file.writeAsString(append);
+            await Share.shareXFiles([XFile(path)], text: '视频源导出文件');
+            EasyLoading.showSuccess("导出成功");
+          } else if (GetPlatform.isWindows ||
+              GetPlatform.isLinux ||
+              GetPlatform.isMacOS) {
+            Directory? directory = await getDownloadsDirectory();
+            if (directory == null) {
+              EasyLoading.showError("无法获取下载目录");
+              return;
+            }
+            String? path = await FilePicker.platform.saveFile(
+              initialDirectory: directory.path,
+              fileName: filename,
+            );
+            if (path == null) return;
+            File file = File(path);
+            await file.writeAsString(append);
+            EasyLoading.showSuccess("导出成功: $path");
+          }
+        } catch (e) {
+          EasyLoading.showError("导出失败: ${e.toString()}");
         }
         break;
     }
@@ -313,18 +336,18 @@ class _MirrorTableViewState extends State<MirrorTableView>
                             icon: Icons.assignment,
                           ),
                           PullDownMenuItem(
-                            title: '导出源',
                             onTap: () {
-                              // handleClickSubMenu(MenuActionType.export);
-                              // boop.selection();
+                              handleClickSubMenu(MenuActionType.export);
+                              boop.selection();
                             },
+                            title: '导出源',
                             icon: CupertinoIcons.arrowshape_turn_up_right,
                           ),
                           PullDownMenuItem(
                             onTap: () {
-                              // handleClickSubMenu(
-                              //     MenuActionType.deleteUnavailable);
-                              // boop.selection();
+                              handleClickSubMenu(
+                                  MenuActionType.deleteUnavailable);
+                              boop.selection();
                             },
                             title: '一键删除失效源',
                             isDestructive: true,
@@ -365,20 +388,20 @@ class _MirrorTableViewState extends State<MirrorTableView>
                         Navigator.pop(context);
                       },
                       child: Container(
-                              padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: context.isDarkMode
                               ? Colors.red.shade700.withValues(alpha: .2)
                               : Colors.red.shade50,
-                                borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
-                            Icons.close,
-                            size: 18,
-                            color: context.isDarkMode
-                                ? Colors.red.shade300
-                                : Colors.red.shade600,
-                          ),
+                          Icons.close,
+                          size: 18,
+                          color: context.isDarkMode
+                              ? Colors.red.shade300
+                              : Colors.red.shade600,
+                        ),
                       ),
                     ),
                   ],

@@ -6,50 +6,7 @@ import 'package:catmovie/app/widget/zoom.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:markdown_widget/markdown_widget.dart';
 import 'package:xi/xi.dart';
-
-const kUpdateUpstream =
-    "https://api.github.com/repos/waifu-project/movie/releases";
-
-/// 豆包
-/// 将HTML中的img标签转换为Markdown图片格式
-/// [input] 包含img标签的原始字符串
-/// [defaultAlt] 当img标签没有alt属性时使用的默认文本
-String convertImgTagsToMarkdown(String input, {String defaultAlt = '图片'}) {
-  // 使用原始字符串处理各种引号情况，避免转义问题
-  // 处理alt在src后面的情况
-  final regexSrcFirst = RegExp(r'''<img[^>]*src=("|')([^"']*)\1[^>]*alt=("|')([^"']*)\3[^>]*>''',
-      caseSensitive: false);
-  
-  // 处理alt在src前面的情况
-  final regexAltFirst = RegExp(r'''<img[^>]*alt=("|')([^"']*)\1[^>]*src=("|')([^"']*)\3[^>]*>''',
-      caseSensitive: false);
-
-  // 处理没有alt属性的情况
-  final regexNoAlt = RegExp(r'''<img[^>]*src=("|')([^"']*)\1[^>]*>''',
-      caseSensitive: false);
-
-  // 分步替换，确保所有情况都能被处理
-  String result = input
-      .replaceAllMapped(regexSrcFirst, (match) {
-        String imageUrl = match.group(2) ?? '';
-        String altText = match.group(4) ?? defaultAlt;
-        return '![$altText]($imageUrl)';
-      })
-      .replaceAllMapped(regexAltFirst, (match) {
-        String altText = match.group(2) ?? defaultAlt;
-        String imageUrl = match.group(4) ?? '';
-        return '![$altText]($imageUrl)';
-      })
-      .replaceAllMapped(regexNoAlt, (match) {
-        String imageUrl = match.group(2) ?? '';
-        return '![$defaultAlt]($imageUrl)';
-      });
-  
-  return result;
-}
-
 
 class AutoUpdate extends StatefulWidget {
   const AutoUpdate({super.key});
@@ -59,111 +16,280 @@ class AutoUpdate extends StatefulWidget {
 }
 
 class _AutoUpdateState extends State<AutoUpdate> with AfterLayoutMixin {
-  GithubTag? tag;
+  bool _isLoading = true;
+  String _errorMsg = "";
+
+  // 公众号名称
+  static const String _officialAccount = "鹏星影音";
+
+  // 网盘地址配置
+  final List<Map<String, String>> _downloadLinks = [
+    // {
+    //   "name": "123云盘",
+    //   "url": "https://www.123pan.com/s/xxxxxx",
+    //   "icon": "☁️",
+    //   "color": "#2d8cf0",
+    // },
+    // {
+    //   "name": "阿里云盘",
+    //   "url": "https://www.aliyundrive.com/s/xxxxxx",
+    //   "icon": "📦",
+    //   "color": "#ff6a00",
+    // },
+    {
+      "name": "百度网盘",
+      "url": "https://pan.baidu.com/s/1PC-NeeqAdx6ZZc6EKSkHtA?pwd=pyxh",
+      "icon": "💾",
+      "color": "#2d8cf0",
+    },
+    // {
+    //   "name": "蓝奏云",
+    //   "url": "https://wwi.lanzoup.com/xxxxxx",
+    //   "icon": "📁",
+    //   "color": "#00a870",
+    // },
+    // {
+    //   "name": "GitHub Releases",
+    //   "url": "https://github.com/waifu-project/movie/releases/latest",
+    //   "icon": "🐙",
+    //   "color": "#24292e",
+    // },
+  ];
 
   @override
   FutureOr<void> afterFirstLayout(BuildContext context) async {
-    var resp = await XHttp.dio.get<List<dynamic>>(
-      kUpdateUpstream,
-      options: $noCacheOption(),
-    );
-    var tags = (resp.data ?? []).map((item) {
-      return GithubTag.fromJson(item as Map<String, dynamic>);
-    }).toList();
-    tag = tags[0];
-    tag!.body = convertImgTagsToMarkdown(tag!.body);
-    setState(() {});
-  }
-
-  Widget _buildChangelog() {
-    if (tag == null) {
-      return Expanded(
-        child: Center(
-          child: CupertinoActivityIndicator(),
-        ),
-      );
-    }
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Material(
-                child: MarkdownWidget(data: tag!.body),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    // 不需要网络请求，直接显示
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+
     return SizedBox(
       width: double.infinity,
-      height: context.mediaQuery.size.height * .72,
+      height: context.mediaQuery.size.height * .68,
       child: Column(
         children: [
-          _buildChangelog(),
-          Zoom(
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
-              ).copyWith(
-                bottom: context.mediaQuery.padding.bottom + 24,
-              ),
-              child: CupertinoButton.filled(
-                sizeStyle: CupertinoButtonSize.medium,
-                onPressed: () {
-                  if (tag == null) return;
-                  String url =
-                      "https://github.com/waifu-project/movie/releases/latest/download/";
-                  if (GetPlatform.isAndroid) {
-                    url += "catmovie.apk";
-                  } else if (GetPlatform.isIOS) {
-                    url += "catmovie.ipa";
-                  } else if (GetPlatform.isMacOS) {
-                    url += "catmovie-mac.zip";
-                  } else if (GetPlatform.isWindows) {
-                    url += "catmovie-windows.zip";
-                  } else if (GetPlatform.isLinux) {
-                    url += "catmovie-linux-x86_64.tar.gz";
-                  }
-                  url.openURL();
-                },
-                onLongPress: () {
-                  if (GetPlatform.isIOS) {
-                    var url =
-                        "apple-magnifier://install?url=https://github.com/waifu-project/movie/releases/latest/download/catmovie.ipa";
-                    url.openURL();
-                  }
-                },
-                child: Text("下载"),
-              ),
+          // 标题栏
+          Container(
+            padding: EdgeInsets.fromLTRB(20, 20, 20, 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.update_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "应用更新",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    Text(
+                      "选择网盘下载最新版本",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.white54 : Colors.black45,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // 分隔线
+          Container(
+            height: 1,
+            margin: EdgeInsets.symmetric(horizontal: 20),
+            color: isDark
+                ? Colors.white.withOpacity(0.1)
+                : Colors.black.withOpacity(0.05),
+          ),
+
+          // 下载链接列表
+          Expanded(
+            child: _isLoading
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CupertinoActivityIndicator(radius: 20),
+                        SizedBox(height: 12),
+                        Text(
+                          "加载中...",
+                          style: TextStyle(
+                            color: isDark ? Colors.white70 : Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : _errorMsg.isNotEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 48,
+                              color: Colors.red.shade400,
+                            ),
+                            SizedBox(height: 12),
+                            Text(
+                              _errorMsg,
+                              style: TextStyle(
+                                color: isDark ? Colors.white70 : Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        itemCount: _downloadLinks.length,
+                        itemBuilder: (context, index) {
+                          final link = _downloadLinks[index];
+                          return Container(
+                            margin: EdgeInsets.only(bottom: 12),
+                            child: Zoom(
+                              scaleRatio: .98,
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    link["url"]?.openURL();
+                                  },
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Container(
+                                    padding: EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? Colors.white.withOpacity(0.05)
+                                          : Colors.black.withOpacity(0.02),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: isDark
+                                            ? Colors.white.withOpacity(0.08)
+                                            : Colors.black.withOpacity(0.05),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 48,
+                                          height: 48,
+                                          decoration: BoxDecoration(
+                                            color: Color(int.parse(
+                                                    link["color"]!
+                                                        .substring(1, 7),
+                                                    radix: 16))
+                                                .withOpacity(0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              link["icon"]!,
+                                              style: TextStyle(fontSize: 24),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                link["name"]!,
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: isDark
+                                                      ? Colors.white
+                                                      : Colors.black87,
+                                                ),
+                                              ),
+                                              SizedBox(height: 4),
+                                              Text(
+                                                link["url"]!,
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: isDark
+                                                      ? Colors.white54
+                                                      : Colors.black45,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.open_in_new_rounded,
+                                          size: 18,
+                                          color: isDark
+                                              ? Colors.white54
+                                              : Colors.black45,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+          ),
+
+          // 底部提示
+          Container(
+            padding: EdgeInsets.fromLTRB(20, 8, 20, 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 14,
+                  color: isDark ? Colors.white38 : Colors.black38,
+                ),
+                SizedBox(width: 6),
+                Text(
+                  "如链接失效，请前往公众号【$_officialAccount】获取最新地址",
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? Colors.white38 : Colors.black38,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
-}
-
-class GithubTag {
-  String tag_name;
-  String body;
-
-  GithubTag({
-    required this.tag_name,
-    required this.body,
-  });
-
-  factory GithubTag.fromJson(Map<String, dynamic> json) => GithubTag(
-        tag_name: json["tag_name"],
-        body: json["body"],
-      );
 }

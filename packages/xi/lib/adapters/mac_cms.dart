@@ -10,6 +10,7 @@ import '../models/mac_cms/xml_data.dart';
 import '../models/mac_cms/xml_search_data.dart';
 import 'package:xml2json/xml2json.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter/foundation.dart';
 
 /// m3u8 | mp4 都会抓取到
 final kIframeParseRegex = RegExp("[\"']([^\"']+.(m3u8|mp4))[\"']");
@@ -133,26 +134,40 @@ class MacCMSSpider extends ISpiderAdapter {
     int limit = 10,
     String? category,
   }) async {
-    var qs = {
-      "ac": "videolist",
-      "pg": page,
-    };
-    if (category != null &&
-        category.isNotEmpty &&
-        category != kDefaultAllCategory.id) {
-      qs['t'] = category;
+    try {
+      var qs = {
+        "ac": "videolist",
+        "pg": page,
+      };
+      if (category != null &&
+          category.isNotEmpty &&
+          category != kDefaultAllCategory.id) {
+        qs['t'] = category;
+      }
+
+      var resp = await XHttp.dio.get(
+        createUrl(suffix: api_path),
+        queryParameters: qs,
+        options: ops,
+      );
+
+      dynamic data = resp.data;
+
+      // 检查数据是否有效
+      if (data == null || data.toString().isEmpty) {
+        debugPrint("${meta.name}: 返回数据为空");
+        return [];
+      }
+
+      var _type = getResponseTypeAndCheck(data);
+      if (_type == ResponseCustomType.json) {
+        return _parseHomeJSON(data);
+      }
+      return _parseHomeXML(data);
+    } catch (e) {
+      debugPrint("${meta.name} getHome 失败: $e");
+      return [];
     }
-    var resp = await XHttp.dio.get(
-      createUrl(suffix: api_path),
-      queryParameters: qs,
-      options: ops,
-    );
-    dynamic data = resp.data;
-    var _type = getResponseTypeAndCheck(data);
-    if (_type == ResponseCustomType.json) {
-      return _parseHomeJSON(data);
-    }
-    return _parseHomeXML(data);
   }
 
   /// 匹配的规则:
@@ -396,13 +411,70 @@ class MacCMSSpider extends ISpiderAdapter {
   }
 
   List<VideoDetail> _parseHomeJSON(dynamic data) {
-    if (data is! String) {
-      throw AsyncError(
-        _responseParseFail,
-        StackTrace.fromString(_responseParseFail),
-      );
+    // 空数据检查
+    if (data == null) {
+      debugPrint("${meta.name}: JSON 数据为空");
+      return [];
     }
-    return _getJSONList(data);
+
+    if (data is! String) {
+      debugPrint("${meta.name}: 数据不是字符串类型");
+      return [];
+    }
+
+    // 空字符串检查
+    if (data.trim().isEmpty) {
+      debugPrint("${meta.name}: JSON 字符串为空");
+      return [];
+    }
+
+    // 检查是否是有效的 JSON 格式
+    if (!verifyStringIsJSON(data)) {
+      debugPrint("${meta.name}: 不是有效的 JSON 格式");
+      // 只打印前200个字符，避免日志过长
+      String preview = data.length > 200 ? data.substring(0, 200) : data;
+      debugPrint("${meta.name}: 原始数据预览: $preview");
+      return [];
+    }
+
+    try {
+      var json = jsonDecode(data);
+
+      // 检查是否有 list 字段
+      if (json['list'] == null) {
+        debugPrint("${meta.name}: JSON 中没有 list 字段");
+        return [];
+      }
+
+      var list = json['list'];
+      var result = <VideoDetail>[];
+
+      if (list is Map) {
+        try {
+          result.add(__parseListItem(list));
+        } catch (e) {
+          debugPrint("${meta.name}: 解析 Map 项失败: $e");
+        }
+      } else if (list is List) {
+        for (var item in list) {
+          if (item is! Map<String, dynamic>) {
+            debugPrint("${meta.name}: 列表项不是 Map 类型");
+            continue;
+          }
+          try {
+            result.add(__parseListItem(item));
+          } catch (e) {
+            debugPrint("${meta.name}: 解析列表项失败: $e");
+            continue;
+          }
+        }
+      }
+
+      return result;
+    } catch (e) {
+      debugPrint("${meta.name}: JSON 解析失败: $e");
+      return [];
+    }
   }
 
   List<VideoDetail> _getJSONList(dynamic jsonData) {

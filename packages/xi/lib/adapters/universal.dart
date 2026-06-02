@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:dart_qjson/dart_qjson.dart';
 import 'package:xi/xi.dart';
-import 'package:xi/adapters/template.dart';
 
 const kEvalTimeout = Duration(seconds: 6);
 
@@ -127,16 +126,34 @@ class UniversalSpider extends ISpiderAdapter {
   String _generateJSCode(String realCode, {Map<String, dynamic>? params}) {
     var ps = jsonEncode(params ?? {});
     var result = """
-(async ()=> {
-  const env = {
-    get(key, defaultValue) {
-      return this.params[key] ?? defaultValue
-    },
-    baseUrl: `$url`,
-    params: $ps,
+// 确保必要的全局对象存在
+if (typeof window === 'undefined') var window = {};
+if (typeof window.load === 'undefined') window.load = null;
+if (typeof window.onload === 'undefined') window.onload = null;
+if (typeof document === 'undefined') {
+  var document = {
+    createElement: function() { return { style: {}, setAttribute: function() {}, src: '', load: null, onload: null }; },
+    getElementById: function() { return null; },
+    body: { appendChild: function() {} },
+    head: { appendChild: function() {} }
   };
-  $realCode
-})()""";
+}
+
+try {
+  (async ()=> {
+    const env = {
+      get(key, defaultValue) {
+        return this.params[key] ?? defaultValue
+      },
+      baseUrl: `$url`,
+      params: $ps,
+    };
+    $realCode
+  })();
+} catch(e) {
+  console.error('JS执行错误:', e.message);
+  return '[]';
+}""";
     return result;
   }
 
@@ -153,7 +170,7 @@ class UniversalSpider extends ISpiderAdapter {
         // 模板不存在或获取失败，回退到原始逻辑
       }
     }
-    
+
     // 使用原始的JS配置
     var code = _jsMap[type.name];
     if (code is! String) {
@@ -261,3 +278,6 @@ class Templates {
     return templates[id]!;
   }
 }
+
+// 创建全局的 jsTemplate 实例
+final jsTemplate = Templates({});
